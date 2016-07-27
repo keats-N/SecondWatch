@@ -12,6 +12,7 @@
 #define kW self.view.frame.size.width
 #define kH self.view.frame.size.hieght
 int count=0;
+BOOL buttonFlag = NO;
 
 
 @interface ViewController ()
@@ -111,7 +112,7 @@ int count=0;
     [startButton setTitleColor:[UIColor grayColor] forState:UIControlStateSelected];
     
     startButton.tag = 1;
-    [startButton addTarget:self action:@selector(StartAndPause:) forControlEvents:UIControlEventTouchUpInside];
+    [startButton addTarget:self action:@selector(startAndPause:) forControlEvents:UIControlEventTouchUpInside];
     self.startButton = startButton;
     [bView addSubview:startButton];
  
@@ -120,12 +121,13 @@ int count=0;
     UIButton *jcButton = [[UIButton alloc] initWithFrame:CGRectMake((kW-160)/3*2+80,10,80,80)];
     jcButton.backgroundColor = [UIColor whiteColor];
     jcButton.layer.cornerRadius = 40;
-    [jcButton setTitle:@"计次" forState:UIControlStateNormal];
+    NSString *title = @"计次";
+    [jcButton setTitle:title forState:UIControlStateNormal];
     
     [jcButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
     
     jcButton.tag = 2;
-    [jcButton addTarget:self action:@selector(CountNum) forControlEvents:UIControlEventTouchUpInside];
+    [jcButton addTarget:self action:@selector(countAndReset) forControlEvents:UIControlEventTouchUpInside];
     self.jcButton = jcButton;
     [bView addSubview:jcButton];
     
@@ -133,7 +135,7 @@ int count=0;
     //显示计次信息的tableView
     UITableView * jcTableView = [[UITableView alloc] initWithFrame:CGRectMake(0,260,kW,220) style:UITableViewStylePlain];
    // jcTableView.backgroundColor = [UIColor yellowColor];
-    jcTableView.rowHeight = 40;
+    jcTableView.rowHeight = 36.6;
     jcTableView.delegate = self;
     jcTableView.dataSource = self;
     self.jcTableView = jcTableView;
@@ -143,45 +145,70 @@ int count=0;
 }
 
 //响应开始和暂停按钮事件
--(void)StartAndPause:(UIButton *) sButton {
+-(void)startAndPause:(UIButton *) sButton {
 
     sButton.selected = !sButton.selected;
     
-    if(_timer == nil){
+    if(!buttonFlag){
       //0.01秒更新一次
         _timer = [NSTimer scheduledTimerWithTimeInterval:0.01 target:self selector:@selector(runAction) userInfo:nil repeats:YES];
         [[NSRunLoop currentRunLoop] addTimer:_timer forMode:NSRunLoopCommonModes];
-        
+        [_jcButton setTitle:@"计次" forState:UIControlStateNormal];
         NSLog(@"开始计时...");
     
     }
     else{
+         NSLog(@"暂停...");
         [_timer invalidate]; //让定时器失效
+        [_jcButton setTitle:@"复位" forState:UIControlStateNormal];
         
-        count = 0;
-        _timer = nil;
-        _mainLabel.text = @"00:00.00";
-        _conLabel.text = @"00:00.00";
         
-        _seconds=NULL;
-        self.cell = nil;
-        self.jcArray = nil;
-        [self.jcTableView reloadData];
     }
+    buttonFlag = !buttonFlag;
 }
 
 
 //计次
--(void)CountNum{
-
-    count++;
+-(void)countAndReset{
+    //初始情况下不能计次
+    if(_timer != nil){
+        
     
-    _conLabel.text = _mainLabel.text;
-    NSLog(@"第%d次，%@",count,_conLabel.text);
-    [self.jcArray addObject:[NSString stringWithFormat:@"第%d次\t%@",count,_mainLabel.text]];
+    if(buttonFlag){
+        count++;
+    
+        _conLabel.text = _mainLabel.text;
+        NSLog(@"第%d次，%@",count,_conLabel.text);
+        [self.jcArray addObject:[NSString stringWithFormat:@"第%d次\t%@",count,_mainLabel.text]];
     
     
-    [self.jcTableView reloadData];
+        [self.jcTableView reloadData];
+    }else{
+        //复位
+        
+        count = 0;
+        _timer=nil;
+        
+        _mainLabel.text=@"00:00.00";
+        
+        _conLabel.text=@"00:00.00";
+        
+        _seconds = 0 ;
+        [_jcButton setTitle:@"计次" forState:UIControlStateNormal];
+        
+        self.cell=nil;
+        
+        self.jcArray=nil;
+        
+        [self.jcTableView reloadData];
+        
+        NSLog(@"复位.....");
+    }
+    
+    }
+    
+    
+    
 //    _conLabel.text = @"00:00.00";
 }
 
@@ -212,7 +239,9 @@ int count=0;
         
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:identity];
     }
-    cell.textLabel.text = self.jcArray[indexPath.row];
+    
+    NSUInteger row = [indexPath row];
+    cell.textLabel.text = [self.jcArray objectAtIndex:row];
     
     cell.textLabel.textAlignment=NSTextAlignmentCenter;
     
