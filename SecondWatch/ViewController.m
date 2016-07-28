@@ -9,270 +9,202 @@
 #import "ViewController.h"
 
 
-#define kW self.view.frame.size.width
-#define kH self.view.frame.size.hieght
-int count=0;
+#define KScreenWidth self.view.frame.size.width
+#define kScreenHieght self.view.frame.size.hieght
+
+int timesCount=0;
 BOOL buttonFlag = NO;
 
 
-@interface ViewController ()
-
-{
+@interface ViewController () {
     NSTimer *_timer;
-    NSInteger  *_seconds;
+    NSInteger  *_secondsForMainLabel;   //for mainLabel
+    NSInteger *_secondsForConLabel;   //for conLabel
 
 }
 //显示时间的label
-@property (nonatomic,strong) UILabel *mainLabel;
+@property (nonatomic, strong) UILabel *mainLabel;
 
 //右上角的计次时间
-@property (nonatomic,strong) UILabel *conLabel;
+@property (nonatomic,strong) UILabel *cornerLabel;
 
 //开始、暂停按钮
-@property (nonatomic,strong) UIButton *startButton;
+@property (nonatomic,strong) UIButton *startAndPauseButton;
 
-//计次按钮
-@property (nonatomic,strong) UIButton *jcButton;
+//计次、复位按钮
+@property (nonatomic,strong) UIButton *countAndResetButton;
 
 //显示计次信息的tableView
-@property (nonatomic,strong) UITableView *jcTableView;
+@property (nonatomic,strong) UITableView *tableView;
 
 //tableView 中的cell
 @property (nonatomic,strong) UITableViewCell *cell;
 
 //保存计次数据的数组
-@property (nonatomic,strong) NSMutableArray *jcArray;
+@property (nonatomic,strong) NSMutableArray *timeArray;
 
 @end
 
 
 @implementation ViewController
 
-//初始化jcArray
--(NSMutableArray *) jcArray
-{
-
-    if(_jcArray == nil)
-    {
-        _jcArray = [NSMutableArray array];
+//初始化timeArray
+- (NSMutableArray *)timeArray {
     
+    if(_timeArray == nil)
+    {
+        _timeArray = [NSMutableArray array];
     }
-
-    return _jcArray;
-
+    return _timeArray;
 }
 
 
 //入口
 - (void)viewDidLoad {
+    
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
     [self _loadViews];
 }
 
 
 //初始化视图
--(void) _loadViews
-{
-    self.title=@"秒表";
+- (void) _loadViews {
     
+    self.title=@"秒表";
     //右上角  显示时间内容
-    UILabel *conLabel = [[UILabel alloc] initWithFrame:CGRectMake(237, 15, 80, 35)];
-    conLabel.text = @"00:00.00";
-    conLabel.font = [UIFont fontWithName:@"ArialMT" size:18];
-    conLabel.textAlignment = NSTextAlignmentCenter;
-    self.conLabel = conLabel;
-  //  conLabel.backgroundColor=[UIColor colorWithRed:0.57 green:0.80 blue:0.93 alpha:1.00];
-    [self.view addSubview:conLabel];
+    UILabel *cornerLabel = [[UILabel alloc] initWithFrame:CGRectMake(237, 15, 80, 35)];
+    cornerLabel.text = @"00:00.00";
+    cornerLabel.font = [UIFont fontWithName:@"ArialMT" size:18];
+    cornerLabel.textAlignment = NSTextAlignmentCenter;
+    self.cornerLabel = cornerLabel;
+    [self.view addSubview:cornerLabel];
     
     //秒表面板
-    UILabel *mainLabel = [[UILabel alloc] initWithFrame:CGRectMake(0,60,kW,100)];
+    UILabel *mainLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 60, KScreenWidth, 100)];
     mainLabel.text = @"00:00.00";
     mainLabel.font = [UIFont fontWithName:@"ArialMT" size:60];
     mainLabel.textAlignment = NSTextAlignmentCenter;
-    //避免初始化后对象改变
+    //？？？？
     self.mainLabel = mainLabel;
- //   mainLabel.backgroundColor=[UIColor colorWithRed:0.72 green:0.72 blue:0.72 alpha:1.00];
     [self.view addSubview:mainLabel];
-
-    //按钮的背景视图
-    UIView *bView = [[UIView alloc] initWithFrame:CGRectMake(0,160,kW,100)];
-    bView.backgroundColor = [UIColor colorWithRed:0.91 green:0.91 blue:0.91 alpha:1.00];
-    [self.view addSubview:bView];
     
+    //按钮的背景视图
+    UIView *backgroundView = [[UIView alloc] initWithFrame:CGRectMake(0, 160, KScreenWidth, 100)];
+    backgroundView.backgroundColor = [UIColor colorWithRed:0.91 green:0.91 blue:0.91 alpha:1.00];
+    [self.view addSubview:backgroundView];
     
     //开始/停止按钮
-    
-    UIButton *startButton = [[UIButton alloc] initWithFrame:CGRectMake((kW-160)/3,10,80,80)];
-    startButton.backgroundColor = [UIColor whiteColor];
-    startButton.layer.cornerRadius = 40;
-    [startButton setTitle:@"开始" forState:UIControlStateNormal];
-    [startButton setTitle:@"停止" forState:UIControlStateSelected];
-    [startButton setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
-    [startButton setTitleColor:[UIColor grayColor] forState:UIControlStateSelected];
-    
-    startButton.tag = 1;
-    [startButton addTarget:self action:@selector(startAndPause:) forControlEvents:UIControlEventTouchUpInside];
-    self.startButton = startButton;
-    [bView addSubview:startButton];
+    UIButton *startAndPauseButton = [[UIButton alloc] initWithFrame:CGRectMake((KScreenWidth-160) / 3, 10, 80, 80)];
+    startAndPauseButton.backgroundColor = [UIColor whiteColor];
+    startAndPauseButton.layer.cornerRadius = 40;
+    [startAndPauseButton setTitle:@"开始" forState:UIControlStateNormal];
+    [startAndPauseButton setTitle:@"停止" forState:UIControlStateSelected];
+    [startAndPauseButton setTitleColor:[UIColor redColor] forState:UIControlStateNormal];
+    [startAndPauseButton setTitleColor:[UIColor grayColor] forState:UIControlStateSelected];
+    [startAndPauseButton addTarget:self action:@selector(startAndPause:) forControlEvents:UIControlEventTouchUpInside];
+    self.startAndPauseButton = startAndPauseButton;
+    [backgroundView addSubview:startAndPauseButton];
  
     //计次按钮
-    
-    UIButton *jcButton = [[UIButton alloc] initWithFrame:CGRectMake((kW-160)/3*2+80,10,80,80)];
-    jcButton.backgroundColor = [UIColor whiteColor];
-    jcButton.layer.cornerRadius = 40;
+    UIButton *countAndResetButton = [[UIButton alloc] initWithFrame:CGRectMake((KScreenWidth-160) / 3 * 2 + 80, 10, 80, 80)];
+    countAndResetButton.backgroundColor = [UIColor whiteColor];
+    countAndResetButton.layer.cornerRadius = 40;
     NSString *title = @"计次";
-    [jcButton setTitle:title forState:UIControlStateNormal];
-    
-    [jcButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
-    
-    jcButton.tag = 2;
-    [jcButton addTarget:self action:@selector(countAndReset) forControlEvents:UIControlEventTouchUpInside];
-    self.jcButton = jcButton;
-    [bView addSubview:jcButton];
+    [countAndResetButton setTitle:title forState:UIControlStateNormal];
+    [countAndResetButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+    [countAndResetButton addTarget:self action:@selector(countAndReset) forControlEvents:UIControlEventTouchUpInside];
+    self.countAndResetButton = countAndResetButton;
+    [backgroundView addSubview:countAndResetButton];
     
     
     //显示计次信息的tableView
-    UITableView * jcTableView = [[UITableView alloc] initWithFrame:CGRectMake(0,260,kW,220) style:UITableViewStylePlain];
-   // jcTableView.backgroundColor = [UIColor yellowColor];
-    jcTableView.rowHeight = 36.6;
-    jcTableView.delegate = self;
-    jcTableView.dataSource = self;
-    self.jcTableView = jcTableView;
-    
-    [self.view addSubview:jcTableView];
+    UITableView * tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 260, KScreenWidth, 220) style:UITableViewStylePlain];
+    tableView.rowHeight = 36.6;
+    tableView.delegate = self;
+    tableView.dataSource = self;
+    self.tableView = tableView;
+    self.tableView.separatorStyle=UITableViewCellSeparatorStyleNone;
+    [self.view addSubview:tableView];
 
 }
 
 //响应开始和暂停按钮事件
--(void)startAndPause:(UIButton *) sButton {
+- (void)startAndPause:(UIButton *)startButton {
 
-    sButton.selected = !sButton.selected;
-    
-    if(!buttonFlag){
+    startButton.selected = !startButton.selected;
+    if(!buttonFlag) {
       //0.01秒更新一次
-        _timer = [NSTimer scheduledTimerWithTimeInterval:0.01 target:self selector:@selector(runAction) userInfo:nil repeats:YES];
+        _timer = [NSTimer scheduledTimerWithTimeInterval:0.01 target:self selector:@selector(updateTime) userInfo:nil repeats:YES];
         [[NSRunLoop currentRunLoop] addTimer:_timer forMode:NSRunLoopCommonModes];
-        [_jcButton setTitle:@"计次" forState:UIControlStateNormal];
+        [_countAndResetButton setTitle:@"计次" forState:UIControlStateNormal];
         NSLog(@"开始计时...");
-    
-    }
-    else{
-         NSLog(@"暂停...");
+    } else {
+        NSLog(@"暂停...");
         [_timer invalidate]; //让定时器失效
-        [_jcButton setTitle:@"复位" forState:UIControlStateNormal];
-        
-        
+        [_countAndResetButton setTitle:@"复位" forState:UIControlStateNormal];
     }
     buttonFlag = !buttonFlag;
 }
 
 
-//计次
--(void)countAndReset{
+//计次和复位
+- (void)countAndReset{
     //初始情况下不能计次
-    if(_timer != nil){
-        
-    
-    if(buttonFlag){
-        count++;
-    
-        _conLabel.text = _mainLabel.text;
-        NSLog(@"第%d次，%@",count,_conLabel.text);
-        [self.jcArray addObject:[NSString stringWithFormat:@"第%d次\t%@",count,_mainLabel.text]];
-    
-    
-        [self.jcTableView reloadData];
-    }else{
+    if(_timer == nil) {
+        return;
+    }
+    //计次
+    if(buttonFlag) {
+        timesCount++;
+        _secondsForConLabel=0;
+        NSLog(@"第%d次，%@",timesCount,_cornerLabel.text);
+        [self.timeArray addObject:[NSString stringWithFormat:@"第%d次\t\t%@", timesCount, _cornerLabel.text]];
+        [self.tableView reloadData];
+    } else {
         //复位
-        
-        count = 0;
+        timesCount = 0;
         _timer=nil;
-        
         _mainLabel.text=@"00:00.00";
-        
-        _conLabel.text=@"00:00.00";
-        
-        _seconds = 0 ;
-        [_jcButton setTitle:@"计次" forState:UIControlStateNormal];
-        
+        _cornerLabel.text=@"00:00.00";
+        _secondsForMainLabel = 0 ;
+        _secondsForConLabel = 0;
+        [self.countAndResetButton setTitle:@"计次" forState:UIControlStateNormal];
         self.cell=nil;
-        
-        self.jcArray=nil;
-        
-        [self.jcTableView reloadData];
-        
+        self.timeArray=nil;
+        [self.tableView reloadData];
         NSLog(@"复位.....");
     }
-    
-    }
-    
-    
-    
-//    _conLabel.text = @"00:00.00";
 }
 
 
--(void)runAction{
+- (void)updateTime {
     
-    _seconds++;
-    
+    _secondsForMainLabel++;
+    _secondsForConLabel++;
     //动态改变显示的时间
-    NSString * startTime = [NSString stringWithFormat:@"%02li:%02li.%02li",(long)_seconds/60/100%60,(long)_seconds/100%60,(long)_seconds%100];
-    _mainLabel.text = startTime;
-
-
+    NSString * mainLabelTime = [NSString stringWithFormat:@"%02li:%02li.%02li",(long)_secondsForMainLabel / 60 / 100 % 60,(long)_secondsForMainLabel / 100 % 60,(long)_secondsForMainLabel % 100];
+        _mainLabel.text = mainLabelTime;
+    NSString *cornerLabelTime =[NSString stringWithFormat:@"%02li:%02li.%02li",(long)_secondsForConLabel / 60 / 100 % 60,(long)_secondsForConLabel / 100 % 60,(long)_secondsForConLabel % 100];
+      _cornerLabel.text = cornerLabelTime;
 }
 
 //实现UITabViewDataSource 的方法
 - (NSInteger)tableView:(UITableView *)jcTableView numberOfRowsInSection:(NSInteger)section {
-    return self.jcArray.count;
+    return self.timeArray.count;
 }
 
 
--(UITableViewCell *)tableView:(UITableView *)jcTableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+- (UITableViewCell *)tableView:(UITableView *)jcTableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     static NSString *identity = @"JRTable";
     UITableViewCell *cell =[jcTableView dequeueReusableCellWithIdentifier:identity];
-    
-    if(cell == nil){
-        
+    if(cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:identity];
     }
-    
-    NSUInteger row = [indexPath row];
-    cell.textLabel.text = [self.jcArray objectAtIndex:row];
-    
+    NSUInteger row =timesCount-1-[indexPath row];
+    cell.textLabel.text = [self.timeArray objectAtIndex:row];
     cell.textLabel.textAlignment=NSTextAlignmentCenter;
-    
-    self.cell=cell;
+    self.cell = cell;
     return self.cell;
 }
-
-
-//实现代理的方法
-//-(CGFloat)tableView:(UITableView *)jcTableView heightForHeaderInSection:(NSInteger)section{
-//    if(section==0){
-//        return 50;
-//    }
-//    return 40;
-//}
-//
-//#pragma mark 设置每行高度（每行高度可以不一样）
-//-(CGFloat)tableView:(UITableView *)jcTableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
-//    return 45;
-//}
-//
-//#pragma mark 设置尾部说明内容高度
-//-(CGFloat)tableView:(UITableView *)jcTableView heightForFooterInSection:(NSInteger)section{
-//    return 40;
-//}
-//
-
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
 @end
