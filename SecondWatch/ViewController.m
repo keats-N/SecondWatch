@@ -12,8 +12,8 @@
 #define KScreenWidth self.view.frame.size.width
 #define kScreenHieght self.view.frame.size.hieght
 
-int timesCount=0;
-BOOL buttonFlag = NO;
+//记录是否按下开始按钮的flag
+BOOL isStartButtonPressed = NO;
 
 
 @interface ViewController () {
@@ -94,7 +94,7 @@ BOOL buttonFlag = NO;
     [self.view addSubview:backgroundView];
     
     //开始/停止按钮
-    UIButton *startAndPauseButton = [[UIButton alloc] initWithFrame:CGRectMake((KScreenWidth-160) / 3, 10, 80, 80)];
+    UIButton *startAndPauseButton = [[UIButton alloc] initWithFrame:CGRectMake((KScreenWidth - 160) / 3, 10, 80, 80)];
     startAndPauseButton.backgroundColor = [UIColor whiteColor];
     startAndPauseButton.layer.cornerRadius = 40;
     [startAndPauseButton setTitle:@"开始" forState:UIControlStateNormal];
@@ -106,7 +106,7 @@ BOOL buttonFlag = NO;
     [backgroundView addSubview:startAndPauseButton];
  
     //计次按钮
-    UIButton *countAndResetButton = [[UIButton alloc] initWithFrame:CGRectMake((KScreenWidth-160) / 3 * 2 + 80, 10, 80, 80)];
+    UIButton *countAndResetButton = [[UIButton alloc] initWithFrame:CGRectMake((KScreenWidth - 160) / 3 * 2 + 80, 10, 80, 80)];
     countAndResetButton.backgroundColor = [UIColor whiteColor];
     countAndResetButton.layer.cornerRadius = 40;
     NSString *title = @"计次";
@@ -130,9 +130,9 @@ BOOL buttonFlag = NO;
 
 //响应开始和暂停按钮事件
 - (void)startAndPause:(UIButton *)startButton {
-
+    
     startButton.selected = !startButton.selected;
-    if(!buttonFlag) {
+    if(!isStartButtonPressed) {
       //0.01秒更新一次
         _timer = [NSTimer scheduledTimerWithTimeInterval:0.01 target:self selector:@selector(updateTime) userInfo:nil repeats:YES];
         [[NSRunLoop currentRunLoop] addTimer:_timer forMode:NSRunLoopCommonModes];
@@ -143,26 +143,25 @@ BOOL buttonFlag = NO;
         [_timer invalidate]; //让定时器失效
         [_countAndResetButton setTitle:@"复位" forState:UIControlStateNormal];
     }
-    buttonFlag = !buttonFlag;
+    isStartButtonPressed = !isStartButtonPressed;
 }
 
 
 //计次和复位
-- (void)countAndReset{
+- (void)countAndReset {
+    
     //初始情况下不能计次
     if(_timer == nil) {
         return;
     }
     //计次
-    if(buttonFlag) {
-        timesCount++;
+    if(isStartButtonPressed) {
         _secondsForConLabel=0;
-        NSLog(@"第%d次，%@",timesCount,_cornerLabel.text);
-        [self.timeArray addObject:[NSString stringWithFormat:@"第%d次\t\t%@", timesCount, _cornerLabel.text]];
+        [self.timeArray addObject:_cornerLabel.text];
+         NSLog(@"第%d次，%@", _timeArray.count, _cornerLabel.text);
         [self.tableView reloadData];
     } else {
         //复位
-        timesCount = 0;
         _timer=nil;
         _mainLabel.text=@"00:00.00";
         _cornerLabel.text=@"00:00.00";
@@ -174,6 +173,7 @@ BOOL buttonFlag = NO;
         [self.tableView reloadData];
         NSLog(@"复位.....");
     }
+    
 }
 
 
@@ -182,9 +182,9 @@ BOOL buttonFlag = NO;
     _secondsForMainLabel++;
     _secondsForConLabel++;
     //动态改变显示的时间
-    NSString * mainLabelTime = [NSString stringWithFormat:@"%02li:%02li.%02li",(long)_secondsForMainLabel / 60 / 100 % 60,(long)_secondsForMainLabel / 100 % 60,(long)_secondsForMainLabel % 100];
+    NSString * mainLabelTime = [NSString stringWithFormat:@"%02li:%02li.%02li", (long)_secondsForMainLabel / 60 / 100 % 60, (long)_secondsForMainLabel / 100 % 60, (long)_secondsForMainLabel % 100];
         _mainLabel.text = mainLabelTime;
-    NSString *cornerLabelTime =[NSString stringWithFormat:@"%02li:%02li.%02li",(long)_secondsForConLabel / 60 / 100 % 60,(long)_secondsForConLabel / 100 % 60,(long)_secondsForConLabel % 100];
+    NSString *cornerLabelTime =[NSString stringWithFormat:@"%02li:%02li.%02li", (long)_secondsForConLabel / 60 / 100 % 60, (long)_secondsForConLabel / 100 % 60, (long)_secondsForConLabel % 100];
       _cornerLabel.text = cornerLabelTime;
 }
 
@@ -201,10 +201,12 @@ BOOL buttonFlag = NO;
     if(cell == nil) {
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:identity];
     }
-    NSUInteger row =timesCount-1-[indexPath row];
-    cell.textLabel.text = [self.timeArray objectAtIndex:row];
+    NSInteger originRow = [indexPath row];
+    NSInteger reverseRow = _timeArray.count - 1 - originRow;
+    cell.textLabel.text = [[NSString alloc] initWithFormat:@"第%d次\t\t%@", reverseRow + 1, [self.timeArray objectAtIndex:reverseRow] ];
     cell.textLabel.textAlignment=NSTextAlignmentCenter;
     self.cell = cell;
     return self.cell;
 }
+    
 @end
