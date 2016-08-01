@@ -7,6 +7,7 @@
 //
 
 #import "ViewController.h"
+#import "MyTableViewCell.h"
 
 
 #define KScreenWidth self.view.frame.size.width
@@ -16,34 +17,36 @@
 BOOL isStartButtonPressed = NO;
 
 
-@interface ViewController () {
-    NSTimer *_timer;
-    NSInteger  *_secondsForMainLabel;   //for mainLabel
-    NSInteger *_secondsForConLabel;   //for conLabel
+@interface ViewController()
+    
+@property (nonatomic) NSTimer *timer;
+@property (nonatomic) NSInteger  *secondsForMainLabel;   //for mainLabel
+@property (nonatomic) NSInteger *secondsForCornerLabel;   //for cornerLabel
 
-}
+
 //显示时间的label
 @property (nonatomic, strong) UILabel *mainLabel;
 
 //右上角的计次时间
-@property (nonatomic,strong) UILabel *cornerLabel;
+@property (nonatomic, strong) UILabel *cornerLabel;
 
 //开始、暂停按钮
-@property (nonatomic,strong) UIButton *startAndPauseButton;
+@property (nonatomic, strong) UIButton *startAndPauseButton;
 
 //计次、复位按钮
-@property (nonatomic,strong) UIButton *countAndResetButton;
+@property (nonatomic, strong) UIButton *countAndResetButton;
 
 //显示计次信息的tableView
-@property (nonatomic,strong) UITableView *tableView;
+@property (nonatomic, strong) UITableView *tableView;
 
-//tableView 中的cell
-@property (nonatomic,strong) UITableViewCell *cell;
-
+//tableView的cell
+@property (nonatomic, weak) MyTableViewCell *cell;
 //保存计次数据的数组
-@property (nonatomic,strong) NSMutableArray *timeArray;
+@property (nonatomic, strong) NSMutableArray *timeArray;
 
 @end
+
+
 
 
 @implementation ViewController
@@ -68,7 +71,7 @@ BOOL isStartButtonPressed = NO;
 
 
 //初始化视图
-- (void) _loadViews {
+- (void)_loadViews {
     
     self.title=@"秒表";
     //右上角  显示时间内容
@@ -80,11 +83,11 @@ BOOL isStartButtonPressed = NO;
     [self.view addSubview:cornerLabel];
     
     //秒表面板
-    UILabel *mainLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 60, KScreenWidth, 100)];
+   UILabel *mainLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 60, KScreenWidth, 100)];
     mainLabel.text = @"00:00.00";
     mainLabel.font = [UIFont fontWithName:@"ArialMT" size:60];
     mainLabel.textAlignment = NSTextAlignmentCenter;
-    //？？？？
+    //将属性指向这个对象
     self.mainLabel = mainLabel;
     [self.view addSubview:mainLabel];
     
@@ -140,7 +143,8 @@ BOOL isStartButtonPressed = NO;
         NSLog(@"开始计时...");
     } else {
         NSLog(@"暂停...");
-        [_timer invalidate]; //让定时器失效
+        //让定时器失效
+        [_timer invalidate];
         [_countAndResetButton setTitle:@"复位" forState:UIControlStateNormal];
     }
     isStartButtonPressed = !isStartButtonPressed;
@@ -156,7 +160,7 @@ BOOL isStartButtonPressed = NO;
     }
     //计次
     if(isStartButtonPressed) {
-        _secondsForConLabel=0;
+        _secondsForCornerLabel=0;
         [self.timeArray addObject:_cornerLabel.text];
          NSLog(@"第%d次，%@", _timeArray.count, _cornerLabel.text);
         [self.tableView reloadData];
@@ -166,7 +170,7 @@ BOOL isStartButtonPressed = NO;
         _mainLabel.text=@"00:00.00";
         _cornerLabel.text=@"00:00.00";
         _secondsForMainLabel = 0 ;
-        _secondsForConLabel = 0;
+        _secondsForCornerLabel = 0;
         [self.countAndResetButton setTitle:@"计次" forState:UIControlStateNormal];
         self.cell=nil;
         self.timeArray=nil;
@@ -180,11 +184,11 @@ BOOL isStartButtonPressed = NO;
 - (void)updateTime {
     
     _secondsForMainLabel++;
-    _secondsForConLabel++;
+    _secondsForCornerLabel++;
     //动态改变显示的时间
     NSString * mainLabelTime = [NSString stringWithFormat:@"%02li:%02li.%02li", (long)_secondsForMainLabel / 60 / 100 % 60, (long)_secondsForMainLabel / 100 % 60, (long)_secondsForMainLabel % 100];
         _mainLabel.text = mainLabelTime;
-    NSString *cornerLabelTime =[NSString stringWithFormat:@"%02li:%02li.%02li", (long)_secondsForConLabel / 60 / 100 % 60, (long)_secondsForConLabel / 100 % 60, (long)_secondsForConLabel % 100];
+    NSString *cornerLabelTime =[NSString stringWithFormat:@"%02li:%02li.%02li", (long)_secondsForCornerLabel / 60 / 100 % 60, (long)_secondsForCornerLabel / 100 % 60, (long)_secondsForCornerLabel % 100];
       _cornerLabel.text = cornerLabelTime;
 }
 
@@ -194,19 +198,21 @@ BOOL isStartButtonPressed = NO;
 }
 
 
-- (UITableViewCell *)tableView:(UITableView *)jcTableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    
+- (UITableViewCell *)tableView:(UITableView *)countTableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+
     static NSString *identity = @"JRTable";
-    UITableViewCell *cell =[jcTableView dequeueReusableCellWithIdentifier:identity];
+    MyTableViewCell *cell =[countTableView dequeueReusableCellWithIdentifier:identity];
     if(cell == nil) {
-        cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:identity];
+        cell = [[MyTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:identity];
     }
     NSInteger originRow = [indexPath row];
     NSInteger reverseRow = _timeArray.count - 1 - originRow;
-    cell.textLabel.text = [[NSString alloc] initWithFormat:@"第%d次\t\t%@", reverseRow + 1, [self.timeArray objectAtIndex:reverseRow] ];
-    cell.textLabel.textAlignment=NSTextAlignmentCenter;
+    NSString *stringText = [[NSString alloc] initWithFormat:@"第%d次\t\t%@", reverseRow + 1, [self.timeArray objectAtIndex:reverseRow] ];
+    cell.label.text = stringText;
+    cell.label.textAlignment=NSTextAlignmentCenter;
     self.cell = cell;
     return self.cell;
 }
+
     
 @end

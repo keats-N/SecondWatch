@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6D2B1B931D4F1EFB00914213 /* MyTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D2B1B921D4F1EFB00914213 /* MyTableViewCell.m */; };
 		6D765DE81D45AB1900FD683B /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D765DE71D45AB1900FD683B /* main.m */; };
 		6D765DEB1D45AB1900FD683B /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D765DEA1D45AB1900FD683B /* AppDelegate.m */; };
 		6D765DEE1D45AB1900FD683B /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 6D765DED1D45AB1900FD683B /* ViewController.m */; };
@@ -35,6 +36,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		6D2B1B911D4F1EB800914213 /* MyTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyTableViewCell.h; sourceTree = "<group>"; };
+		6D2B1B921D4F1EFB00914213 /* MyTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyTableViewCell.m; sourceTree = "<group>"; };
 		6D765DE31D45AB1900FD683B /* SecondWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SecondWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6D765DE71D45AB1900FD683B /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		6D765DE91D45AB1900FD683B /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -105,6 +108,8 @@
 				6D765DEA1D45AB1900FD683B /* AppDelegate.m */,
 				6D765DEC1D45AB1900FD683B /* ViewController.h */,
 				6D765DED1D45AB1900FD683B /* ViewController.m */,
+				6D2B1B921D4F1EFB00914213 /* MyTableViewCell.m */,
+				6D2B1B911D4F1EB800914213 /* MyTableViewCell.h */,
 				6D765DEF1D45AB1900FD683B /* Main.storyboard */,
 				6D765DF21D45AB1900FD683B /* Assets.xcassets */,
 				6D765DF41D45AB1900FD683B /* LaunchScreen.storyboard */,
@@ -271,6 +276,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6D765DEE1D45AB1900FD683B /* ViewController.m in Sources */,
+				6D2B1B931D4F1EFB00914213 /* MyTableViewCell.m in Sources */,
 				6D765DEB1D45AB1900FD683B /* AppDelegate.m in Sources */,
 				6D765DE81D45AB1900FD683B /* main.m in Sources */,
 			);
@@ -498,6 +504,7 @@
 				6D765E121D45AB1900FD683B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		6D765E131D45AB1900FD683B /* Build configuration list for PBXNativeTarget "SecondWatchTests" */ = {
 			isa = XCConfigurationList;
@@ -506,6 +513,7 @@
 				6D765E151D45AB1900FD683B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		6D765E161D45AB1900FD683B /* Build configuration list for PBXNativeTarget "SecondWatchUITests" */ = {
 			isa = XCConfigurationList;
@@ -514,6 +522,7 @@
 				6D765E181D45AB1900FD683B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
